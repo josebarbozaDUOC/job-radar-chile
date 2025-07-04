@@ -151,7 +151,7 @@ class GetOnBoardScraper:
         Returns: Diccionario con los detalles del trabajo o None si falla
         """
         try:
-            time.sleep(2)  # Rate limiting
+            # time.sleep(2)  # Rate limiting
             
             # Validar y construir URL completa
             if not job_url.startswith('http'):
@@ -170,6 +170,27 @@ class GetOnBoardScraper:
             
             # Guardar HTML para debugging
             # self._save_raw_html(soup, f"job_detail_{job_id}.txt")
+
+            # VALIDACIÓN DE FECHA - RETORNO TEMPRANO
+            date_posted_tag = soup.find('time', itemprop='datePosted')
+            date_posted = date_posted_tag['datetime'] if date_posted_tag and date_posted_tag.has_attr('datetime') else None
+            posted_date_clean = datetime.fromisoformat(date_posted).date().isoformat() if date_posted else None
+
+            if posted_date_clean:
+                try:
+                    job_date = datetime.fromisoformat(posted_date_clean)
+                    days_old = (datetime.now() - job_date).days
+                    
+                    if days_old > MAX_JOB_AGE_DAYS:
+                        print(f"Trabajo descartado: {posted_date_clean} ({days_old} días)")
+                        return None
+                        
+                except Exception as e:
+                    print(f"Error validando fecha: {e}")
+                    return None
+            else:
+                print("Trabajo descartado: sin fecha")
+                return None
             
             # Básicos
             job_portal = self.portal_name
@@ -182,16 +203,7 @@ class GetOnBoardScraper:
             
             company_url_tag = soup.find('span', itemprop='url')
             company_url = company_url_tag.get_text(strip=True) if company_url_tag else None
-            
-            """
-            AHORA QUE SE PUEDE ACCEDER A LA FECHA COMPLETA DE PUBLICACIÓN
-            ACÁ FALTA VALIDAR E IGNORAR ESTA PUBLICACIÓN SI NO ES DE LOS ÚLTIMOS 30 DÍAS
-            REUTILIZAR _is_recent_job() ?
-            """
-            date_posted_tag = soup.find('time', itemprop='datePosted')
-            date_posted = date_posted_tag['datetime'] if date_posted_tag and date_posted_tag.has_attr('datetime') else None
-            posted_date_clean = datetime.fromisoformat(date_posted).date().isoformat() if date_posted else None
-            
+
             # Location y Modalidad combinados
             location_modality = None
             location_element = soup.select_one('.location')
@@ -228,7 +240,7 @@ class GetOnBoardScraper:
             modality = None
 
             if location_modality:
-                # Buscar paréntesis
+                # Si viene entre paréntesis: Remote (Chile), Santiago (In-office)
                 match = re.search(r'^(.*?)\s*\((.*?)\)$', location_modality)
                 if match:
                     first_part = match.group(1).strip()
@@ -244,9 +256,15 @@ class GetOnBoardScraper:
                         location = first_part
                         modality = second_part
                 else:
-                    # Sin paréntesis, asumir que todo es location
-                    location = location_modality
-                    modality = None
+                    # Sin paréntesis
+                    if location_modality.lower() in ['remote', 'remoto']:
+                        # Solo dice "Remoto" -> modality=Remoto, location=Not specified
+                        location = 'Not specified'
+                        modality = location_modality
+                    else:
+                        # Solo dice "Santiago" -> location=Santiago, modality=Not specified
+                        location = location_modality
+                        modality = 'Not specified'
 
 
             experience_tag = soup.find('span', itemprop='qualifications')
@@ -297,10 +315,17 @@ class GetOnBoardScraper:
             if description_div:
                 first_rich_txt = description_div.find('div', class_='gb-rich-txt')
                 if first_rich_txt:
-                    # Buscar el primer elemento hijo que sea p o div
-                    first_content = first_rich_txt.find(['p', 'div'])
-                    if first_content:
-                        company_description = first_content.get_text(strip=True)
+                    # Obtener todos los p y div, excepto el disclaimer final
+                    content_elements = first_rich_txt.find_all(['p', 'div'])
+                    
+                    # Filtrar el disclaimer (contiene "getonbrd.com" o "Get on Board")
+                    descriptions = []
+                    for elem in content_elements:
+                        text = elem.get_text(strip=True)
+                        if text and not any(disclaimer in text for disclaimer in ['getonbrd.com', 'Get on Board']):
+                            descriptions.append(text)
+                    # Unir todo con espacios
+                    company_description = ' '.join(descriptions)
 
             # Secciones textuales (functions, requirements, nice_to_have, benefits)
             sections = []

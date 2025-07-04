@@ -197,19 +197,19 @@ def insert_job_offer(job_data: dict) -> bool:
                 None,  # salary_max_market_usd
                 0,  # salary_estimated_by_llm
                 None,  # requirements_raw
-                json.dumps(job_data.get('tech_stack_raw', [])) if job_data.get('tech_stack_raw') else None,
+                json.dumps(job_data.get('tech_stack_raw', []), ensure_ascii=False) if job_data.get('tech_stack_raw') else None,
                 None,  # main_techs
                 None,  # skills_required
                 None,  # skills_preferred
                 None,  # english_required
                 None,  # english_level
                 None,  # job_description_raw
-                json.dumps(job_data.get('sections_raw', [])) if job_data.get('sections_raw') else None,
+                json.dumps(job_data.get('sections_raw', []), ensure_ascii=False) if job_data.get('sections_raw') else None,
                 None,  # job_summary_llm
                 None,  # responsibilities_llm
                 None,  # benefits_raw
                 None,  # benefits_parsed_llm
-                json.dumps(job_data.get('perks_raw', [])) if job_data.get('perks_raw') else None,
+                json.dumps(job_data.get('perks_raw', []), ensure_ascii=False) if job_data.get('perks_raw') else None,
                 0,  # llm_processed
                 None,  # llm_processed_at
                 None,  # llm_confidence_score

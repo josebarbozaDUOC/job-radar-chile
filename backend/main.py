@@ -149,7 +149,7 @@ def main():
     # PASO 2: Scraping de detalles de cada oferta
     #scrape_job_details()
     #scrape_job_details(test_mode=True)
-    scrape_job_details(limit=10)
+    scrape_job_details(limit=30)
     
     # Mostrar estadísticas
     show_stats()

@@ -1,8 +1,8 @@
 # job-radar-chile
 
-    Sistema de análisis del mercado laboral tech chileno mediante web scraping y procesamiento de datos.
+Sistema de análisis del mercado laboral tech chileno mediante web scraping y procesamiento de datos.
 
-    Herramienta que automatiza la recolección de ofertas de trabajo desde portales chilenos para generar insights sobre el mercado tecnológico local.
+Herramienta que automatiza la recolección de ofertas de trabajo desde portales chilenos para generar insights sobre el mercado tecnológico local.
 
 ## Estado Actual
 ### Implementado
@@ -11,10 +11,12 @@
 - Almacenamiento en SQLite
 - Arquitectura modular
 - Extracción de datos detallados de ofertas (GetOnBoard)
+- Doble validación de fecha de publicación
+- Refinar scraping detallado (formatos)
 
 ### En Desarrollo
-- Doble validación de fecha de publicación
-- Refinar scraping detallado
+- Rediseñar esquema [job_offers](docs/job_offer_schema.md)
+- Separar las secciones del cuerpo de publicación (sections_raw)
 - Reporte simple en excel
 - Migrar a postgres e implementar ORM
 - Implementar Docker compose
