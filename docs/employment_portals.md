@@ -1,4 +1,4 @@
-# Portales de Empleo en Chile
+# Portales de Empleo contemplados (en Chile)
 
 ## Generalistas (uso amplio)
 Estas plataformas tienen ofertas de todo tipo, desde prácticas hasta cargos ejecutivos:
