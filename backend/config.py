@@ -90,8 +90,8 @@ INSERT OR IGNORE INTO job_urls
 SCHEMA_JOB_OFFERS = """
 CREATE TABLE IF NOT EXISTS job_offers (
     id INTEGER PRIMARY KEY,
-    job_id TEXT,
-    source_url TEXT UNIQUE,
+    job_id TEXT UNIQUE,
+    source_url TEXT,
     portal_name TEXT,
     scraped_at TEXT,
     posted_date TEXT,
@@ -144,6 +144,15 @@ CREATE TABLE IF NOT EXISTS job_offers (
     benefits_raw TEXT,
     benefits_parsed_llm TEXT,
     perks_raw TEXT,
+    responsibilities TEXT,
+    requirements TEXT,
+    nice_to_have TEXT,
+    candidate_profile TEXT,
+    benefits TEXT,
+    work_conditions TEXT,
+    selection_process TEXT,
+    how_to_apply TEXT,
+    others TEXT,
     llm_processed INTEGER,
     llm_processed_at TEXT,
     llm_confidence_score REAL,
@@ -174,11 +183,21 @@ INSERT OR IGNORE INTO job_offers (
     salary_estimated_by_llm, requirements_raw, tech_stack_raw, main_techs,
     skills_required, skills_preferred, english_required, english_level,
     job_description_raw, sections_raw, job_summary_llm, responsibilities_llm,
-    benefits_raw, benefits_parsed_llm, perks_raw, llm_processed,
+    benefits_raw, benefits_parsed_llm, perks_raw, 
+    responsibilities,
+    requirements,
+    nice_to_have,
+    candidate_profile,
+    benefits,
+    work_conditions,
+    selection_process,
+    how_to_apply,
+    others,
+    llm_processed,
     llm_processed_at, llm_confidence_score, processing_notes, is_active,
     last_checked_at, applications_raw, application_deadline, reply_time_raw,
     remote_policy_raw, apply_url
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 );
 """

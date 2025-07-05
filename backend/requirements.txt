@@ -5,3 +5,4 @@ lxml==6.0.0
 selenium==4.34.0
 fake-useragent==2.2.0
 python-dateutil==2.9.0.post0
+rapidfuzz==3.13.0

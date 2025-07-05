@@ -9,11 +9,12 @@ import sys
 import time
 from datetime import datetime
 import random
+from scrapers.getonbrd import GetOnBoardScraper
 from config import GETONBOARD_CATEGORIES
 from database import create_tables, insert_job_urls, get_job_count_by_portal
 from database import get_job_urls_full, insert_job_offer, mark_job_as_processed
-from scrapers.getonbrd import GetOnBoardScraper
-
+from database import get_jobs_sections_raw, update_job_sections
+from utils.section_classifier import section_classifier
 
 def scrape_getonboard(categories: list = None):
     """
@@ -132,6 +133,58 @@ def show_stats():
     for portal, count in stats:
         print(f"{portal}: {count} trabajos")
 
+
+def process_all_sections():
+    """Procesar y clasificar todas las secciones de las ofertas"""
+
+    print("\n" + "="*50)
+    print("CLASIFICACIÓN DE SECCIONES")
+    print("="*50)
+
+    # Obtener todas las ofertas con sections_raw
+    jobs_data = get_jobs_sections_raw()
+    print(f"Procesando {len(jobs_data)} ofertas con secciones...")
+    
+    processed = 0
+    errors = 0
+    
+    for job in jobs_data:
+        job_id = job['job_id']
+        sections = job['sections']
+        
+        # Clasificar cada sección
+        classified = {}
+        
+        for section in sections:
+            title = section.get('title', '')
+            content = section.get('content', '')
+            
+            # Clasificar usando el título
+            category = section_classifier(title)
+            
+            if category:
+                # Si ya existe esta categoría, concatenar
+                if category in classified:
+                    classified[category] += f"\n\n{content}"
+                else:
+                    classified[category] = content
+            else:
+                # Agregar a "others" si no se pudo clasificar
+                if 'others' not in classified:
+                    classified['others'] = ""
+                classified['others'] += f"\n\n[{title}]\n{content}"
+        
+        # Actualizar en la BD
+        if update_job_sections(job_id, classified):
+            processed += 1
+        else:
+            errors += 1
+    
+    print(f"\nResultados:")
+    print(f"- Procesadas exitosamente: {processed}")
+    print(f"- Errores: {errors}")
+    
+    return processed, errors
         
 def main():
     """Función principal"""
@@ -146,14 +199,39 @@ def main():
     # scrape_getonboard(GETONBOARD_CATEGORIES)  # Todas las categorías
     scrape_getonboard(['programming'])
     
-    # PASO 2: Scraping de detalles de cada oferta
-    #scrape_job_details()
-    #scrape_job_details(test_mode=True)
-    scrape_job_details(limit=30)
-    
     # Mostrar estadísticas
     show_stats()
+
+    # Scraping de detalles de cada oferta
+    #scrape_job_details()
+    #scrape_job_details(test_mode=True)
+    scrape_job_details(limit=10)
+
+    # Verificar que hay datos para procesar
+    jobs_with_sections = get_jobs_sections_raw()
+    if jobs_with_sections:
+        process_all_sections()
+    else:
+        print("No hay ofertas con secciones para procesar")
+
     print("\n✓ Proceso completado")
+
+
+
+    '''# TEST simular sections_raw de db
+    sections_raw = [
+        {"title": "Funciones del cargo", "content": "¿Qué harás en tu día a día?..."},
+        {"title": "Requerimientos del cargo", "content": "Skills\nJava\nSpring Boot..."},
+        {"title": "Deseables", "content": "Conocimientos de CI /CD & DevOps..."},
+        {"title": "Beneficios", "content": "Algunos de nuestros beneficios..."}
+    ]
+
+    # test de section_classifier
+    for section in sections_raw:
+        # Opción A: Pasar título y contenido juntos
+        texto_completo = f"{section['title']} {section['content']}"
+        categoria = section_classifier(texto_completo)
+        print(f"{section['title']} -> {categoria}")'''
 
 
 if __name__ == "__main__":

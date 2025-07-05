@@ -210,6 +210,15 @@ def insert_job_offer(job_data: dict) -> bool:
                 None,  # benefits_raw
                 None,  # benefits_parsed_llm
                 json.dumps(job_data.get('perks_raw', []), ensure_ascii=False) if job_data.get('perks_raw') else None,
+                None, # responsibilities
+                None, # requirements
+                None, # nice_to_have
+                None, # candidate_profile
+                None, # benefits
+                None, # work_conditions
+                None, # selection_process
+                None, # how_to_apply
+                None, # others
                 0,  # llm_processed
                 None,  # llm_processed_at
                 None,  # llm_confidence_score
@@ -231,4 +240,78 @@ def insert_job_offer(job_data: dict) -> bool:
             return False
         except Exception as e:
             print(f"Error insertando job offer: {e}")
+            return False
+        
+
+def get_jobs_sections_raw() -> List[dict]:
+    """
+    Obtener job_id y sections_raw de todas las ofertas
+    Returns: Lista de diccionarios con job_id y sections_raw parseado
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT job_id, sections_raw 
+            FROM job_offers 
+            WHERE sections_raw IS NOT NULL
+        """)
+        
+        results = []
+        for row in cursor.fetchall():
+            try:
+                sections = json.loads(row['sections_raw']) if row['sections_raw'] else []
+                results.append({
+                    'job_id': row['job_id'],
+                    'sections': sections
+                })
+            except json.JSONDecodeError:
+                print(f"Error parseando sections_raw para job_id: {row['job_id']}")
+                continue
+                
+        return results
+
+
+def update_job_sections(job_id: str, classified_sections: dict) -> bool:
+    """
+    Actualizar los campos de secciones clasificadas en job_offers
+    Args:
+        job_id: ID del trabajo
+        classified_sections: Diccionario con las secciones clasificadas
+    Returns: True si se actualizó correctamente
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                UPDATE job_offers 
+                SET 
+                    responsibilities = ?,
+                    requirements = ?,
+                    nice_to_have = ?,
+                    candidate_profile = ?,
+                    benefits = ?,
+                    work_conditions = ?,
+                    selection_process = ?,
+                    how_to_apply = ?,
+                    others = ?
+                WHERE job_id = ?
+            """, (
+                classified_sections.get('responsibilities'),
+                classified_sections.get('requirements'),
+                classified_sections.get('nice_to_have'),
+                classified_sections.get('candidate_profile'),
+                classified_sections.get('benefits'),
+                classified_sections.get('work_conditions'),
+                classified_sections.get('selection_process'),
+                classified_sections.get('how_to_apply'),
+                classified_sections.get('others'),
+                job_id
+            ))
+            
+            conn.commit()
+            return cursor.rowcount > 0
+            
+        except Exception as e:
+            print(f"Error actualizando secciones para job_id {job_id}: {e}")
             return False

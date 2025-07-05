@@ -1,5 +1,5 @@
 raw/
-*.db
+#*.db
 __pycache__/
 .vscode/
 .vscode

@@ -79,6 +79,18 @@
     benefits_parsed_llm: beneficios parseados (JSON array)
     perks: lista de perks (JSON array en texto)
 
+**Secciones:**
+
+    responsibilities: Funciones y tareas del cargo, qué hará en el día a día
+    requirements: Requisitos obligatorios, experiencia y habilidades técnicas necesarias
+    nice_to_have: Habilidades deseables pero no obligatorias, puntos extra
+    candidate_profile: Perfil ideal del candidato, soft skills y características personales
+    benefits: Beneficios laborales, compensaciones y perks ofrecidos
+    work_conditions: Modalidad, horario, salario, ubicación y tipo de contrato
+    selection_process: Etapas del proceso de selección y timeline
+    how_to_apply: Instrucciones para postular y enviar candidatura
+    others: Información adicional que no encaja en otras categorías
+    
 **Procesamiento:**
 
     llm_processed: booleano si ya fue procesado por LLM

@@ -13,13 +13,14 @@ Herramienta que automatiza la recolección de ofertas de trabajo desde portales 
 - Extracción de datos detallados de ofertas (GetOnBoard)
 - Doble validación de fecha de publicación
 - Refinar scraping detallado (formatos)
+- Rediseñar esquema [job_offers](docs/job_offer_schema.md)
+- Separar las secciones del cuerpo de publicación (sections_raw) semántico
 
 ### En Desarrollo
-- Rediseñar esquema [job_offers](docs/job_offer_schema.md)
-- Separar las secciones del cuerpo de publicación (sections_raw)
+- Debug url slug
 - Reporte simple en excel
-- Migrar a postgres e implementar ORM
 - Implementar Docker compose
+- Migrar a postgres e implementar ORM
 - Procesamiento con LLM local
 - Dashboard de visualización
 
